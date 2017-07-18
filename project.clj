@@ -1,8 +1,6 @@
-(defproject redbox "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
+(defproject redbox "0.1.0"
+  :description "Classify bank statements for analysis."
   :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/data.csv "0.1.4"]
                  [org.clojure/clojure "1.8.0"]]
   :main ^:skip-aot redbox.core
