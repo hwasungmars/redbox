@@ -4,6 +4,7 @@
             [clojure.data.csv :as csv]
             [clojure.java.io :as io]
             [clojure.pprint :as pprint])
+  (:import clojure.lang.PersistentVector)
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -20,7 +21,7 @@
 
 (defn concat-if
   "Concat elements without duplicates.  This is order preserving."
-  [left right]
+  [^PersistentVector left right]
   (let [missing (filter #(not (.contains left %)) right)]
     (concat left missing)))
 

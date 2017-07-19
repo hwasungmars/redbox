@@ -2,6 +2,6 @@
   (:require [clojure.test :refer :all]
             [redbox.core :refer :all]))
 
-(deftest a-test
-  (testing "FIXME, I fail."
-    (is (= 0 1))))
+(deftest classifier-test
+  (testing "Classifier should be able to classify well known cases."
+    (is (= (:tag (classifier {:Description "BOOTS Optician"})) "beauty"))))
