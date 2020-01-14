@@ -4,12 +4,15 @@
 
 (defn desc-classifier
   "Classify based on description."
-  [is-true tag]
-  (fn [csv-map]
-    (let [desc (:Description csv-map)]
-      (if (is-true desc)
-        (assoc csv-map :tag tag)
-        csv-map))))
+  ([is-true tag]
+   (partial desc-classifier is-true tag))
+  ([is-true tag data]
+   (try
+     (let [desc (:description data) ]
+       (if (is-true desc)
+         (assoc data :tag tag)
+         data))
+     (catch Exception e (RuntimeException. "Failed to classify data" e)))))
 
 (def cafe
   "Identify cafe and tag them."
@@ -50,8 +53,8 @@
 
 (def kids
   "Identify kids item and tag them."
-  (let [is-kids (fn [^String desc] (or (.contains desc "TOY")))]
-    (desc-classifier is-kids "kids")))
+  (let [kids? (fn [^String desc] (.contains desc "TOY"))]
+    (desc-classifier kids? "kids")))
 
 (def shopping
   "Identify shopping and tag them."
