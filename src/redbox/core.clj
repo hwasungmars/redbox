@@ -5,8 +5,9 @@
             [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as string]
+            [clojure.tools.logging :as logging]
             )
-  (:import clojure.lang.PersistentVector)
+  (:import [java.io File])
   (:gen-class))
 
 (set! *warn-on-reflection* true)
@@ -34,19 +35,7 @@
               parse-data)
          csv-data)))
 
-(defn classifier
-  "The classifier to run the data through."
-  [data]
-  (-> data
-      classifiers/beauty
-      classifiers/cafe
-      classifiers/eating-out
-      classifiers/groceries
-      classifiers/kids
-      classifiers/shopping
-      ))
-
-(defn all-keys
+(defn collect-all-keys
   "Collect all the keys from a collection of hash-map."
   [hash-map]
   (let [keys (map #(-> %
@@ -68,16 +57,55 @@
   ([header data]
    (map data header)))
 
+(defn csv-file->classified-maps
+  "Read in a CSV fiule and return the classified data."
+  [csv]
+  (->> csv
+       io/reader
+       load-csv
+       (map classifiers/full-classifier)))
+
+(defn classified-maps->csv-data
+  "Convert the classified maps to CSV data strucuture with header and then followed by data."
+  [classified-maps]
+  (let [header (-> classified-maps collect-all-keys create-header)
+        extract-data (extract-data-by-header header)
+        formatted (map extract-data classified-maps)]
+    (concat [header] formatted)))
+
+(defn file->file-name-string
+  "From a File object, extract out the file name."
+  [^File file]
+  (-> file
+      .getName
+      (string/split #"\.")
+      first))
+
+(defn construct-output-path
+  "Given an input file, construct the output file."
+  [^File input-file]
+  (let [file-name (file->file-name-string input-file)
+        ^String parent-dir (.getParent input-file)]
+    (File. parent-dir (str file-name "-classified.csv"))))
+
+(defn reader->classified-csv
+  "Given a CSV file reader, load it, classify it and return data in CSV format."
+  [reader]
+  (let [classified (->> reader
+                        load-csv
+                        (map classifiers/full-classifier))
+        header (-> classified collect-all-keys create-header)
+        extract-data (extract-data-by-header header)
+        formatted (map extract-data classified)]
+    (concat [header] formatted)))
+
 (defn -main
   "Read in bank statement CSV and classify them."
   [& args]
-  (with-open [reader (io/reader (first args))]
-    (with-open [writer (io/writer (second args))]
-      (let [classified (->> reader
-                            load-csv
-                            (map classifier))
-            header (-> classified all-keys create-header)
-            extract-data (extract-data-by-header header)
-            formatted (map extract-data classified)]
+  (let [^File input-file (File. ^String (first args))
+        ^File output-file (construct-output-path input-file)]
+    (logging/info "Classifying" (.getAbsolutePath input-file) "->" (.getAbsolutePath output-file))
+    (with-open [reader (io/reader input-file)]
+      (with-open [writer (io/writer output-file)]
         (csv/write-csv writer
-                       (concat [header] formatted))))))
+                       (reader->classified-csv reader))))))
