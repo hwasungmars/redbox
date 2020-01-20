@@ -1,11 +1,12 @@
-(ns redbox.core-notebook
+(ns redbox.core-notes
   (:require
     [clojure.data.csv :as csv]
     [clojure.java.io :as io]
     [clojure.pprint :as pprint]
     [clojure.string :as string]
-    [redbox.core :refer :all]
+    [redbox.categorisers :as categorisers]
     [redbox.classifiers :as classifiers]
+    [redbox.core :refer :all]
     )
   (:import [java.io File])
   )
@@ -69,3 +70,5 @@
 (file->file-name-string (File. "/foo/bar.csv"))
 
 (-> "/Foo/bar.csv" File. .getName (string/split #"\."))
+
+(categorisers/categorise {:tag :commuting})

@@ -1,12 +1,14 @@
 (ns redbox.core
-  (:require [redbox.classifiers :as classifiers]
+  (:require
+    [redbox.categorisers :as categorisers]
+    [redbox.classifiers :as classifiers]
 
-            [clojure.data.csv :as csv]
-            [clojure.java.io :as io]
-            [clojure.set :as set]
-            [clojure.string :as string]
-            [clojure.tools.logging :as logging]
-            )
+    [clojure.data.csv :as csv]
+    [clojure.java.io :as io]
+    [clojure.set :as set]
+    [clojure.string :as string]
+    [clojure.tools.logging :as logging]
+    )
   (:import [java.io File])
   (:gen-class))
 
@@ -93,7 +95,9 @@
   [reader]
   (let [classified (->> reader
                         load-csv
-                        (map classifiers/full-classifier))
+                        (map classifiers/full-classifier)
+                        (map categorisers/categorise)
+                        )
         header (-> classified collect-all-keys create-header)
         extract-data (extract-data-by-header header)
         formatted (map extract-data classified)]

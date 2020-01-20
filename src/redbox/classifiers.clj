@@ -6,138 +6,214 @@
 
 (defn classifier
   "Extract field and classify."
-  [predicate? tag data]
+  [tag predicate? data]
   (try
     (if (predicate? data)
       (assoc data :tag tag)
       data)
     (catch Exception e
-      (logging/warn "Failed to classify [" tag "]; skipping:" data)
+      (logging/warn "Failed to classify [" tag "]; skipping:" data e)
       data)))
 
 (defn desc-classifier
   "Classify based on description."
-  [predicate? tag]
-  (partial classifier #(-> % :description predicate?) tag))
+  [tag predicate?]
+  (partial classifier tag #(-> % :description predicate?)))
 
 (def cafe
-  "Identify cafe and tag them."
-  (let [is-cafe (fn [^String desc] (or
-                                     (.contains desc "COFFEE")
-                                     (.contains desc "ESPRESSO")
-                                     (.contains desc "PRET A MANGER")
-                                     (.startsWith desc "CAFFE NERO")
-                                     (.startsWith desc "COSTA")
-                                     (.startsWith desc "EX CELLAR")
-                                     (.startsWith desc "PARADE AND ALBANY")
-                                     (.startsWith desc "SOPRATTUTTO")
-                                     ))]
-    (desc-classifier is-cafe "cafe")))
+  (desc-classifier :cafe
+                   (fn [^String x]
+                     (or
+                       (.contains x "COFFEE")
+                       (.contains x "ESPRESSO")
+                       (.contains x "PRET A MANGER")
+                       (.contains x "STARBUCKS ")
+                       (.startsWith x "CAFFE NERO")
+                       (.startsWith x "COSTA")
+                       (.startsWith x "EX CELLAR")
+                       (.startsWith x "LES 3 CHOCOLATS")
+                       (.startsWith x "PARADE AND ALBANY")
+                       (.startsWith x "SOPRATTUTTO")
+                       ))))
 
 (def beauty
-  "Identify beauty item and tag them."
-  (let [is-beauty (fn [^String desc] (or
-                                       (.startsWith desc "BOOTS")
-                                       (.contains desc "CLEANER")
-                                       ))]
-    (desc-classifier is-beauty "beauty")))
+  (desc-classifier :beauty
+                   (fn [^String x]
+                     (or
+                       (.contains x "CLEANER")
+                       (.startsWith x "BOOTS")
+                       (.startsWith x "SUPERDRUG")
+                       ))))
 
 (def eating-out
-  "Identify eating out and tag them."
-  (let [is-eating-out (fn [^String desc] (or
-                                           (.contains desc "THAI")
-                                           (.startsWith desc "HARTS BOATYARD")
-                                           (.startsWith desc "NANDO")
-                                           (.startsWith desc "WAGAMAMA")
-                                           ))]
-    (desc-classifier is-eating-out "eating-out")))
+  (desc-classifier :eating-out
+                   (fn [^String x]
+                     (or
+                       (.contains x "ARONG")
+                       (.contains x "BURGER")
+                       (.contains x "CATERING")
+                       (.contains x "THAI")
+                       (.contains x "XIAOMIAN")
+                       (.startsWith x "HARTS BOATYARD")
+                       (.startsWith x "KANADA YA")
+                       (.startsWith x "MCDONALDS")
+                       (.startsWith x "NANDO")
+                       (.startsWith x "PIZZA EXPRESS")
+                       (.startsWith x "WAGAMAMA")
+                       ))))
 
 (def groceries
-  "Identify groceries and tag them."
-  (let [is-groceries (fn [^String desc] (or
-                                          (.startsWith desc "H MART")
-                                          (.startsWith desc "MARKS & SPENCER")
-                                          (.startsWith desc "MARKS AND SPENCER")
-                                          (.startsWith desc "POUNDLAND ")
-                                          (.startsWith desc "SAINSBURY'S")
-                                          (.startsWith desc "TESCO")
-                                          (.startsWith desc "W H SMITH")
-                                          (.startsWith desc "WAITROSE")
-                                          ))]
-    (desc-classifier is-groceries "groceries")))
+  (desc-classifier :groceries
+                   (fn [^String x]
+                     (or
+                       (.contains x "HELLOFRESH")
+                       (.contains x "MARKSSPENCE")
+                       (.contains x "WAITROSE")
+                       (.startsWith x "COOK")
+                       (.startsWith x "H MART")
+                       (.startsWith x "MARKS & SPENCER")
+                       (.startsWith x "MARKS AND SPENCER")
+                       (.startsWith x "NEXT")
+                       (.startsWith x "POUNDLAND")
+                       (.startsWith x "SAINSBURY'S")
+                       (.startsWith x "TESCO")
+                       ))))
 
 (def kids
-  "Identify kids item and tag them."
-  (let [kids? (fn [^String desc] (or
-                                   (.contains desc "BABY")
-                                   (.contains desc "JOJOMAMAN")
-                                   (.contains desc "SLING")
-                                   (.contains desc "TOY")
-                                   (.startsWith desc "JOJO MAMAN")
-                                   (.startsWith desc "MOTHERCARE")
-                                   ))]
-    (desc-classifier kids? "kids")))
+  (desc-classifier :kids
+                   (fn [^String x]
+                     (or
+                       (.contains x "BABY")
+                       (.contains x "CHILDREN")
+                       (.contains x "JOJOMAMAN")
+                       (.contains x "KIDS")
+                       (.contains x "MOTHERCARE")
+                       (.contains x "PARTYBAGS")
+                       (.contains x "SLING")
+                       (.contains x "TOY")
+                       (.startsWith x "JOJO MAMAN")
+                       (.startsWith x "TUPPENCE AND CRUMBLE")
+                       ))))
+
+(def health
+  (desc-classifier :health
+                   (fn [^String x]
+                     (.contains x "DENTAL")
+                     )))
 
 (def shopping
-  "Identify shopping and tag them."
-  (let [is-shopping (fn [^String desc] (or
-                                         (.contains desc "AMAZON")
-                                         (.startsWith desc "BENTALLS")
-                                         (.startsWith desc "FARRAGO")
-                                         (.startsWith desc "JOHN LEWIS")
-                                         ))]
-    (desc-classifier is-shopping "shopping")))
+  (desc-classifier :shopping
+                   (fn [^String x]
+                     (or
+                       (.contains x "AMAZON")
+                       (.contains x "JOHNLEWIS")
+                       (.contains x "PARCELFORCE")
+                       (.contains x "W H SMITH")
+                       (.startsWith x "BENTALLS")
+                       (.startsWith x "FARRAGO")
+                       (.startsWith x "FAT FACE")
+                       (.startsWith x "HOTEL CHOCOLAT")
+                       (.startsWith x "JOHN LEWIS")
+                       ))))
 
 (def exercise
-  "Identify exercise items."
-  (let [exercise? (fn [^String desc] (or
-                                       (.contains desc "LES MILLS")
-                                       (.contains desc "WIGGLE")
-                                       ))]
-    (desc-classifier exercise? "exercise")))
+  (desc-classifier :exercise
+                   (fn [^String x]
+                     (or
+                       (.contains x "SWEATBANDCO")
+                       (.contains x "LES MILLS")
+                       (.contains x "WIGGLE")
+                       ))))
 
 (def technology
-  "Identify technology items."
-  (let [tech? (fn [^String desc] (.startsWith desc "APPLE"))]
-    (desc-classifier tech? "technology")))
+  (desc-classifier :technology
+                   (fn [^String x]
+                     (or
+                       (.contains x "DIGITALRIVE")
+                       (.contains x "HPINCUKLIMI")
+                       (.contains x "MICROSOFT")
+                       (.startsWith x "APPLE")
+                       (.startsWith x "ITUNES.COM")
+                       (.startsWith x "PLUME LABS")
+                       ))))
 
 (def book
-  "Identify book item"
-  (let [book? (fn [^String desc] (.startsWith desc "WATERSTONES"))]
-    (desc-classifier book? "book")))
+  (desc-classifier :book
+                   (fn [^String x]
+                     (or
+                       (.contains x "KINDLE")
+                       (.startsWith x "WATERSTONES")
+                       ))
+                   ))
+
+(def household
+  (desc-classifier :household
+                   (fn [^String x]
+                     (or
+                       (.contains x "AVIVA INSURANCE")
+                       (.startsWith x "LAKELAND")
+                       (.startsWith x "ZARA HOME")
+                       ))
+                   ))
+
+(def motors
+  (desc-classifier :motors
+                   (fn [^String x]
+                     (or
+                       (.contains x "MAYPOLEMOTO")
+                       (.startsWith x "DIRECT LINE")
+                       ))))
+
+(def donation
+  (desc-classifier :donation
+                   (fn [^String x]
+                     (or
+                       (.contains x "WIKIPEDIA")
+                       (.startsWith x "CROWDFUNDER")
+                       (.startsWith x "CANCER RESEARCH")
+                       (.startsWith x "JUSTGIVING")
+                       (.startsWith x "WATERSTONES")
+                       ))))
 
 (def travelling
-  "Identify travelling cost and tag them."
-  (let [travelling? (fn [data] (let [^String desc (:description data)
-                                     ^String misc (:misc data)]
-                                 (or
-                                   (.contains desc "TFL")
-                                   (.startsWith desc "BA HIGH LIFE")
-                                   (.contains misc "COMM.FEE")
-                                   )))]
-    (partial classifier travelling? "travelling")))
+  (partial classifier :travelling
+           (fn [data] (let [^String desc (:description data)
+                            ^String misc (:misc data)]
+                        (or
+                          (.contains desc "PARKING")
+                          (.contains desc "SAMSONITE")
+                          (.contains desc "SNAPPYSNAPS")
+                          (.contains misc "COMM.FEE")
+                          (.startsWith desc "BA HIGH LIFE")
+                          (.startsWith desc "UBER")
+                          )))))
 
-(def payment
-  "Identify payment into the account."
-  (let [payment? (fn [data] (-> data :amount (< 0)))]
-    (partial classifier payment? "payment")))
+(def commuting 
+  (desc-classifier :commuting
+                   (fn [^String x]
+                     (.contains x "TFL"))))
 
-(def default
-  "If no tag has been assigned, assign default unknown tag."
-  (let [not-tagged? (fn [data] (-> data :tag nil?))]
-    (partial classifier not-tagged? "unknown")))
+(def payment (partial classifier :payment #(-> % :amount (< 0))))
+
+(def default (partial classifier :unknown #(-> % :tag nil?)))
 
 (defn full-classifier
   "The classifier to run the data through."
   [data]
   (-> data
-      book
+
       beauty
+      book
       cafe
+      commuting
+      donation
       eating-out
       exercise
       groceries
+      health
+      household
       kids
+      motors
       payment
       shopping
       technology
