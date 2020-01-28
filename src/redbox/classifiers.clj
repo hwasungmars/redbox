@@ -41,7 +41,6 @@
                    (fn [^String x]
                      (or
                        (.contains x "CLEANER")
-                       (.startsWith x "BOOTS")
                        (.startsWith x "SUPERDRUG")
                        ))))
 
@@ -69,6 +68,7 @@
                        (.contains x "HELLOFRESH")
                        (.contains x "MARKSSPENCE")
                        (.contains x "WAITROSE")
+                       (.startsWith x "BOOTS")
                        (.startsWith x "COOK")
                        (.startsWith x "H MART")
                        (.startsWith x "MARKS & SPENCER")

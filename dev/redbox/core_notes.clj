@@ -1,14 +1,18 @@
 (ns redbox.core-notes
   (:require
+    [org.satta.glob :as glob]
+    [redbox.categorisers :as categorisers]
+    [redbox.classifiers :as classifiers]
+    [redbox.core :refer :all]
+
     [clojure.data.csv :as csv]
     [clojure.java.io :as io]
     [clojure.pprint :as pprint]
     [clojure.string :as string]
-    [redbox.categorisers :as categorisers]
-    [redbox.classifiers :as classifiers]
-    [redbox.core :refer :all]
     )
-  (:import [java.io File])
+  (:import
+    [java.io File]
+    )
   )
 
 (set! *warn-on-reflection* true)
@@ -72,3 +76,8 @@
 (-> "/Foo/bar.csv" File. .getName (string/split #"\."))
 
 (categorisers/categorise {:tag :commuting})
+
+(glob/glob "/Users/hwasung_lee/Documents/bank-statements/amex-*.csv")
+
+(File. "~/Documents/bank-statements/amex-2019-12-16\~2020-01-15.csv")
+

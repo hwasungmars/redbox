@@ -2,6 +2,8 @@
   :description "Classify bank statements for analysis."
   :url "http://example.com/FIXME"
   :dependencies [
+                 [clj-glob "1.0.0"]
+
                  [org.clojure/clojure "1.10.1"]
                  [org.clojure/data.csv "0.1.4"]
                  [org.clojure/test.check "0.10.0"]

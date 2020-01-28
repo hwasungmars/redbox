@@ -13,7 +13,7 @@
    :exercise :need
    :groceries :need
    :health :need
-   :household :want
+   :household :need
    :kids :need
    :motors :want
    :shopping :want

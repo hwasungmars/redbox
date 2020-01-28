@@ -3,6 +3,8 @@
     [redbox.categorisers :as categorisers]
     [redbox.classifiers :as classifiers]
 
+    [org.satta.glob :as glob]
+
     [clojure.data.csv :as csv]
     [clojure.java.io :as io]
     [clojure.set :as set]
@@ -60,7 +62,7 @@
    (map data header)))
 
 (defn csv-file->classified-maps
-  "Read in a CSV fiule and return the classified data."
+  "Read in a CSV file and return the classified data."
   [csv]
   (->> csv
        io/reader
@@ -75,20 +77,12 @@
         formatted (map extract-data classified-maps)]
     (concat [header] formatted)))
 
-(defn file->file-name-string
-  "From a File object, extract out the file name."
-  [^File file]
-  (-> file
-      .getName
-      (string/split #"\.")
-      first))
-
 (defn construct-output-path
   "Given an input file, construct the output file."
   [^File input-file]
-  (let [file-name (file->file-name-string input-file)
+  (let [file-name (.getName input-file)
         ^String parent-dir (.getParent input-file)]
-    (File. parent-dir (str file-name "-classified.csv"))))
+    (File. parent-dir (str "classified-" file-name))))
 
 (defn reader->classified-csv
   "Given a CSV file reader, load it, classify it and return data in CSV format."
@@ -103,13 +97,20 @@
         formatted (map extract-data classified)]
     (concat [header] formatted)))
 
-(defn -main
-  "Read in bank statement CSV and classify them."
-  [& args]
-  (let [^File input-file (File. ^String (first args))
+(defn process-file
+  "Process the file and write out results."
+  [^String file-path]
+  (let [^File input-file (File. file-path)
         ^File output-file (construct-output-path input-file)]
     (logging/info "Classifying" (.getAbsolutePath input-file) "->" (.getAbsolutePath output-file))
     (with-open [reader (io/reader input-file)]
       (with-open [writer (io/writer output-file)]
         (csv/write-csv writer
                        (reader->classified-csv reader))))))
+
+(defn -main
+  "Read in bank statement CSV and classify them."
+  [& args]
+  (->> args
+       (map process-file)
+       doall))
